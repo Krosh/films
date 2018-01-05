@@ -1,5 +1,7 @@
 var ObjectID = require('mongodb').ObjectID;
 module.exports = function (app, db) {
+    const parserModule = require('../parser/parser');
+    const parser = new parserModule();
 
     app.post('/add-film/', (req, res) => {
         const movie = {title: req.headers.title, description: req.headers.description, image: req.headers.image, rating: req.headers.rating, tags: req.headers.tags};
@@ -34,6 +36,11 @@ module.exports = function (app, db) {
 
     });
 
+    app.get('/test/', (req, res) => {
+        parser.parse('https://yandex.ru/', (content) => {
+            console.log(content);
+        })
+    });
 
     app.get('/users/:id', (req, res) => {
         const id = req.params.id;
