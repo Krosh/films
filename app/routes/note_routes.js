@@ -34,7 +34,7 @@ module.exports = function (app, db) {
     });
 
     app.get('/films/', (req, res) => {
-        db.collection("films").find({}).toArray(function (err, result) {
+        db.collection("films").find({isParsed: true}).toArray(function (err, result) {
             if (err) throw err;
             res.send(result);
             console.log(result);
@@ -57,53 +57,80 @@ module.exports = function (app, db) {
             console.log(totalNum);
             for (let i = 0; i <= totalNum / numPage; i++) {
                 const url = `/user/${id}/votes/list/ord/date/perpage/200/page/${i}/#list`;
+                setTimeout(() => {
+                   parser.parse(url, ($) => {
+                        let hrefs = [];
+                        $('.profileFilmsList .item').map(function () {
+                            const $a = $(this).find('a');
+                            hrefs.push($a.attr('href'));
 
-                parser.parse(url, ($) => {
-                    let hrefs = [];
-                    $('.nameRus a').map(function () {
-                        hrefs.push($(this).attr('href'));
-                    });
-                    db.collection('films').find({
-                        url: {$in: hrefs}
-                    }).toArray((err, alreadySavedFilms) => {
-                        if (!err) {
-                            alreadySavedFilms.forEach((film) => {
-                                const pos = hrefs.indexOf(film.url);
-                                if (pos > -1) {
-                                    hrefs.splice(pos, 1);
-                                }
+                            const mark = {
+                                idUser: id,
+                                rating: $(this).find('.vote').text(),
+                                film: $a.attr('href'),
+                            };
+
+                            db.collection('films').find(mark)
+                                .toArray((err, data) => {
+                                    if (err) {
+                                        db.collection('films').insert(mark);
+                                    }
                             });
-                        }
-                        hrefs.forEach((url) => {
-                            let info = {url: url, isParsed: false};
-                            db.collection('films').insert(info);
+                        });
+
+                        db.collection('films').find({
+                            url: {$in: hrefs}
+                        }).toArray((err, alreadySavedFilms) => {
+                            if (!err) {
+                                alreadySavedFilms.forEach((film) => {
+                                    const pos = hrefs.indexOf(film.url);
+                                    if (pos > -1) {
+                                        hrefs.splice(pos, 1);
+                                    }
+                                });
+                            }
+                            hrefs.forEach((url) => {
+                                let info = {url: url, isParsed: false};
+                                db.collection('films').insert(info);
+                            });
                         });
                     });
-                });
+                }, i * 60000);
             }
         })
     });
 
 
-    app.get('/test/', (req, res) => {
-        var url = '/film/startrek-beskonechnost-2016-734349/';
-        parser.parse(url, ($) => {
-            let info = {};
-            info.name = $('.moviename-big').text();
-            info.engName = $('span[itemprop="alternativeHeadline"]').text();
-            info.image = $('.film-img-box [itemprop="image"]').attr('src');
-            info.url = url;
-            info.isParsed = true;
-            info.rating = parseFloat($('.rating_ball').text());
-
-            db.collection('films').insert(info, (err, result) => {
-                if (err) {
-                    res.send({'error': 'An error has occurred'});
-                } else {
-                    res.send(result.ops[0]);
+    app.get('/parse-film/', (req, res) => {
+        db.collection('films').findOne({
+            isParsed: false
+        }, (err, item) => {
+            if (err) {
+                return;
+            }
+            const url = item.url;
+            parser.parse(url, ($) => {
+                let info = {};
+                info.name = $('.moviename-big').text();
+                if (info.name == '') {
+                    console.log('has captcha')
+                    return;
                 }
-            });
-        })
+                info.engName = $('span[itemprop="alternativeHeadline"]').text();
+                info.image = $('.film-img-box [itemprop="image"]').attr('src');
+                info.url = url;
+                info.isParsed = true;
+                info.rating = parseFloat($('.rating_ball').text());
+
+                db.collection('films').update({url: url}, info, (err, result) => {
+                    if (err) {
+                        res.send({'error': 'An error has occurred'});
+                    } else {
+                        res.send(result.ops);
+                    }
+                });
+            })
+        });
     });
 
     app.get('/users/:id', (req, res) => {
