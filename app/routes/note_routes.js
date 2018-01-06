@@ -58,7 +58,7 @@ module.exports = function (app, db) {
             for (let i = 0; i <= totalNum / numPage; i++) {
                 const url = `/user/${id}/votes/list/ord/date/perpage/200/page/${i}/#list`;
                 setTimeout(() => {
-                   parser.parse(url, ($) => {
+                    parser.parse(url, ($) => {
                         let hrefs = [];
                         $('.profileFilmsList .item').map(function () {
                             const $a = $(this).find('a');
@@ -75,7 +75,7 @@ module.exports = function (app, db) {
                                     if (err) {
                                         db.collection('films').insert(mark);
                                     }
-                            });
+                                });
                         });
 
                         db.collection('films').find({
@@ -109,27 +109,30 @@ module.exports = function (app, db) {
                 return;
             }
             const url = item.url;
-            parser.parse(url, ($) => {
-                let info = {};
-                info.name = $('.moviename-big').text();
-                if (info.name == '') {
-                    console.log('has captcha')
-                    return;
-                }
-                info.engName = $('span[itemprop="alternativeHeadline"]').text();
-                info.image = $('.film-img-box [itemprop="image"]').attr('src');
-                info.url = url;
-                info.isParsed = true;
-                info.rating = parseFloat($('.rating_ball').text());
-
-                db.collection('films').update({url: url}, info, (err, result) => {
-                    if (err) {
-                        res.send({'error': 'An error has occurred'});
-                    } else {
-                        res.send(result.ops);
+            setInterval(function () {
+                parser.parse(url, ($) => {
+                    let info = {};
+                    info.name = $('.moviename-big').text();
+                    if (info.name == '') {
+                        console.log('has captcha')
+                        return;
                     }
-                });
-            })
+                    info.engName = $('span[itemprop="alternativeHeadline"]').text();
+                    info.image = $('.film-img-box [itemprop="image"]').attr('src');
+                    info.url = url;
+                    info.isParsed = true;
+                    info.rating = parseFloat($('.rating_ball').text());
+
+                    db.collection('films').update({url: url}, info, (err, result) => {
+                        if (err) {
+                            res.send({'error': 'An error has occurred'});
+                        } else {
+                            res.send(result.ops);
+                        }
+                    });
+                })
+                console.log('eee бой')
+            }, 30000)
         });
     });
 
