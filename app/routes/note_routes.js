@@ -3,8 +3,15 @@ module.exports = function (app, db) {
     const parserModule = require('../parser/parser');
     const parser = new parserModule();
 
+
     app.post('/add-film/', (req, res) => {
-        const movie = {title: req.headers.title, description: req.headers.description, image: req.headers.image, rating: req.headers.rating, tags: req.headers.tags};
+        const movie = {
+            title: req.headers.title,
+            description: req.headers.description,
+            image: req.headers.image,
+            rating: req.headers.rating,
+            tags: req.headers.tags
+        };
         db.collection('films').insert(movie, (err, result) => {
             if (err) {
                 res.send({'error': 'An error has occurred'});
@@ -27,7 +34,7 @@ module.exports = function (app, db) {
     });
 
     app.get('/films/', (req, res) => {
-        db.collection("films").find({}).toArray(function(err, result) {
+        db.collection("films").find({}).toArray(function (err, result) {
             if (err) throw err;
             res.send(result);
             console.log(result);
@@ -36,9 +43,66 @@ module.exports = function (app, db) {
 
     });
 
+    app.get('/parse-user/:id', (req, res) => {
+        const id = req.params.id;
+        const url = `/user/${id}/votes/list/ord/date/page/1/#list`;
+        parser.parse(url, ($, res) => {
+            if (!$('.pagesFromTo').length) {
+                console.log(res);
+                return;
+            }
+
+            const totalNum = parseInt($('.pagesFromTo').text().split(' ').slice(-1)[0]);
+            const numPage = 200;
+            console.log(totalNum);
+            for (let i = 0; i <= totalNum / numPage; i++) {
+                const url = `/user/${id}/votes/list/ord/date/perpage/200/page/${i}/#list`;
+
+                parser.parse(url, ($) => {
+                    let hrefs = [];
+                    $('.nameRus a').map(function () {
+                        hrefs.push($(this).attr('href'));
+                    });
+                    db.collection('films').find({
+                        url: {$in: hrefs}
+                    }).toArray((err, alreadySavedFilms) => {
+                        if (!err) {
+                            alreadySavedFilms.forEach((film) => {
+                                const pos = hrefs.indexOf(film.url);
+                                if (pos > -1) {
+                                    hrefs.splice(pos, 1);
+                                }
+                            });
+                        }
+                        hrefs.forEach((url) => {
+                            let info = {url: url, isParsed: false};
+                            db.collection('films').insert(info);
+                        });
+                    });
+                });
+            }
+        })
+    });
+
+
     app.get('/test/', (req, res) => {
-        parser.parse('https://yandex.ru/', (content) => {
-            console.log(content);
+        var url = '/film/startrek-beskonechnost-2016-734349/';
+        parser.parse(url, ($) => {
+            let info = {};
+            info.name = $('.moviename-big').text();
+            info.engName = $('span[itemprop="alternativeHeadline"]').text();
+            info.image = $('.film-img-box [itemprop="image"]').attr('src');
+            info.url = url;
+            info.isParsed = true;
+            info.rating = parseFloat($('.rating_ball').text());
+
+            db.collection('films').insert(info, (err, result) => {
+                if (err) {
+                    res.send({'error': 'An error has occurred'});
+                } else {
+                    res.send(result.ops[0]);
+                }
+            });
         })
     });
 
@@ -67,7 +131,7 @@ module.exports = function (app, db) {
     });
 
     app.get('/users/', (req, res) => {
-        db.collection("users").find({}).toArray(function(err, result) {
+        db.collection("users").find({}).toArray(function (err, result) {
             if (err) throw err;
             res.send(result);
             console.log(result);
