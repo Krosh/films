@@ -1,0 +1,79 @@
+.filmsIntro {
+   max-width 800px
+   flex 1
+   background-color white
+   border-radius 5px
+   box-shadow 0 0.4rem 0.8rem 0 rgba(0, 0, 0, .07)
+   box-sizing border-box
+   padding 30px 20px
+   padding-right 45px
+   &__wrapper {
+      display flex
+      flex-wrap wrap
+      margin 0 -5px
+   }
+   &__side {
+      flex 0 0 auto
+      width 220px
+      margin 0 5px
+      display flex
+      justify-content center
+      align-items center
+   }
+   &__main {
+      flex 1
+      margin 0 5px
+   }
+   &__poster {
+      flex 1
+      min-height 280px
+      max-width 240px
+      background-size contain
+      background-repeat no-repeat
+      background-position center
+   }
+   &__title {
+      font-weight 700
+      font-size 24px
+
+   }
+   &__subtitle {
+      font-size 18px
+   }
+   &__desc {
+      max-width 420px
+      font-size 12px
+      max-height 18px * 5
+      overflow hidden
+      text-overflow ellipsis
+      margin-bottom 20px
+   }
+   &__rating {
+      margin-bottom 25px
+   }
+   &__action {
+
+   }
+   &__header {
+      margin-bottom 25px
+      &-wrapper {
+         display flex
+         flex-wrap nowrap
+         margin 0 -5px
+         align-items center
+      }
+      &-main {
+         line-height 1
+         flex 1
+         margin 0 5px
+      }
+      &-side {
+         line-height 1
+         flex 0 0 auto
+         width 80px
+         margin 0 5px
+         text-align right
+      }
+
+   }
+}

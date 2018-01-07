@@ -1,0 +1,21 @@
+.rating {
+   &__list {
+      display flex
+      margin 0 -2px
+   }
+   &__item {
+      margin 0 2px
+      flex 0 0 auto
+      cursor pointer
+      &:before {
+         content ''
+         display block
+         svg('star',30px,#9e9e9e)
+      }
+      &_active {
+         &:before {
+            svg-color('star',#ffca28)
+         }
+      }
+   }
+}

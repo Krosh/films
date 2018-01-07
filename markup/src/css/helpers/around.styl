@@ -1,0 +1,13 @@
+around(args) {
+   top args[0]
+   right args[1] ? args[1] : @top
+   bottom args[2] ? args[2] : @top
+   left args[3] ? args[3] : @right
+}
+
+around-square(width, height = width) {
+   top ((@height - height) / 2)
+   bottom ((@height - height) / 2)
+   left ((@width - width) / 2)
+   right ((@width - width) / 2)
+}

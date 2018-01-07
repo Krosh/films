@@ -1,0 +1,78 @@
+.button::-moz-focus-inner {
+   padding 0
+   border 0
+}
+
+$button,
+.button {
+   cursor pointer
+   user-select none
+   transition $transition-main
+   box-sizing border-box
+   vertical-align top
+   display inline-flex
+   align-items center
+   justify-content center
+   background-color #53b374
+   box-shadow 0 1rem 1.5rem 0 rgba(83,179,116,.3)
+   position relative
+   border 1px solid rgba($color-black,.0)
+   outline none
+   color white
+   font-family $font-main
+   font-style normal
+   font-weight 500
+   font-size 14px
+   border-radius 5px
+   line-height $line-main
+   letter-spacing 0
+   padding 12px 15px
+   text-align center
+   text-transform none
+   text-decoration none
+   &__ok {
+      margin-left 6px
+      &:before {
+         content ''
+         display block
+         position relative
+         svg('ok',20px,#fff)
+      }
+   }
+   &__icon {
+      margin-right 10px
+      &::before {
+         content ''
+         display block
+      }
+
+      &:last-child {
+         margin-left 10px
+         margin-right 0
+      }
+   }
+   &__title {
+   }
+
+   &:hover {
+      background-color #41925d
+      box-shadow none
+   }
+   &:active {
+      opacity 0.8
+   }
+   &:disabled {
+      border-color $color-gray
+      background-color  $color-gray
+   }
+
+   &.is-loading {
+      opacity .5
+   }
+}
+
+
+$button_full,
+.button_full {
+   width 100%
+}

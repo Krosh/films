@@ -1,0 +1,16 @@
+/**
+ * Shorthand for adding custom fonts
+ * @param {{string|ident}} font-name - Namespace in css
+ * @param {{string|ident}} file-name - File name
+ * @param {{string|ident}} font-weight - self-explanatory
+ * @param {{string|ident}} font-style - self-explanatory
+ */
+include-font(font-name, file-name, font-weight = normal, font-style = normal) {
+   @font-face {
+      font-family font-name
+      src url('../fonts/'+file-name+'.eot')
+      src url('../fonts/'+file-name+'.eot#iefix') format('embedded-opentype'), url('../fonts/'+file-name+'.woff') format('woff')
+      font-weight font-weight
+      font-style font-style
+   }
+}

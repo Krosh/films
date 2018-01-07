@@ -1,0 +1,41 @@
+{
+  "name": "PROJECT_NAME",
+  "description": "",
+  "main": "gulpfile.js",
+  "authors": [],
+  "license": "ISC",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "^1.x",
+    "isMobile": "^0.4.1",
+    "inputmask": "^3.3.8",
+    "owl.carousel": "^2.2.1",
+    "fancybox": "^3.2.5"
+  },
+  "overrides": {
+    "inputmask": {
+      "main": [
+        "./dist/jquery.inputmask.bundle.js"
+      ]
+    },
+    "slick-carousel": {
+      "main": [
+        "slick/slick.js",
+        "slick/slick.css"
+      ]
+    },
+    "fancybox": {
+      "main": [
+        "./dist/jquery.fancybox.js",
+        "./dist/jquery.fancybox.css"
+      ]
+    }
+  }
+}

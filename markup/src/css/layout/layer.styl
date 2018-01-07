@@ -1,0 +1,147 @@
+.layer {
+   flex 1 0 auto
+   display flex
+   position fixed
+   // position absolute
+   trbl 0
+   background #fff
+   min-height 100%
+   z-index 1200
+   opacity 0
+   transform translateY(5vh)
+   transition transform $transition-main, opacity $transition-main
+   box-sizing border-box
+   &__inside {
+      box-sizing border-box
+      flex 1 0 auto
+      width 100%
+      padding 50px 0
+      +do(1000) {
+         padding 30px 0
+      }
+   }
+   &__header {
+      box-sizing border-box
+      position relative
+      margin-bottom 50px
+      +do(1000) {
+         margin-bottom 30px
+      }
+      +do(750) {
+         padding-right 40px
+      }
+   }
+   &__content {
+      box-sizing border-box
+      overflow hidden
+      width 100%
+   }
+   &__footer {
+      box-sizing border-box
+      margin-top auto
+   }
+   &__title {
+      @extend $title-h1
+
+      &_xsmall {
+
+      }
+   }
+
+   &.is-aside {
+      transition transform .4s ease-in-out, opacity .0s ease-in-out .4s
+      transform translateX(-100%)
+      &.is-opened {
+         transition transform .4s linear, opacity .4s linear
+      }
+   }
+   &.is-opened {
+      z-index 1210
+      opacity 1
+      transform translate(0, 0)
+   }
+   &:not(.is-animating) {
+      transform none
+      position relative
+   }
+   &.is-faded {
+      position fixed
+      opacity 0
+   }
+   &.is-closing {
+      z-index 1210
+      position fixed
+   }
+   &:not(.is-initialized) {
+      display none !important
+   }
+}
+
+.layer-close {
+   z-index 200
+   position absolute
+   top 0
+   right 0
+   padding 17px
+   border none
+   +do(750) {
+      top 0
+      right 0
+   }
+   &::before {
+      content ''
+      transition $transition-fast
+      display block
+      svg('cross', 20px, $color-white)
+      +do(750) {
+         svg('cross', 20px, $color-black)
+      }
+   }
+}
+
+.layer_overlay {
+   pointer-events none
+   align-items center
+   justify-content center
+   padding-top 26px
+   padding-bottom 26px
+   background none
+   +do(750) {
+      align-items stretch
+      padding-top 0
+      padding-bottom 0
+   }
+   .layer {
+      &__inside {
+         pointer-events auto
+         flex 0 1 auto
+         position relative
+         max-width 320px
+         width auto
+         background #fff
+         margin auto 54px
+         border-radius 10px
+         box-sizing botder-box
+         +do(750) {
+            max-width none
+            width 100%
+            margin 0
+            border-radius 0
+         }
+      }
+      &__content {
+         width auto
+      }
+   }
+
+   &.is-opened {
+      transform none
+   }
+   &_left {
+      transform translateX(-100%)
+      justify-content flex-start
+      &.is-opened {
+         transform translate(0, 0)
+      }
+   }
+}

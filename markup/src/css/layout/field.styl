@@ -1,0 +1,98 @@
+.field {
+   display block
+   position relative
+   margin-bottom 16px
+   &__error,
+   &__title {
+      transition $transition-main
+      overflow hidden
+      display block
+      max-height 100px
+      margin-bottom 8px
+      font-size $size-small
+      line-height $line-small
+   }
+   &__main {
+      display block
+      position relative
+   }
+   /$input,
+   &__input {
+      transition $transition-main
+      appearance none
+      box-sizing border-box
+      display block
+      width 100%
+      padding 11px 19px 10px
+      border-radius 19px
+      border 1px solid #c0c4a9
+      outline 0
+      color #1a1a1a
+      font-family $font-main
+      font-size $size-main
+      line-height $line-main
+      +placeholder() {
+         color $color-main
+      }
+      &:focus {
+         border-color $color-main
+      }
+      select& {
+         user-select none
+         padding-right (19px + 25px)
+         &::-ms-expand {
+            display none
+         }
+      }
+   }
+   &__error {
+      transition $transition-main
+      overflow hidden
+      display none
+      color $color-error
+   }
+
+   &.is-error {
+      .field__input {}
+      .field__main {}
+      .field__error {
+         display block
+      }
+      .field__title {
+         display none
+      }
+   }
+}
+
+.field_select {
+   .field__main {
+      &::after {
+         content ''
+         position absolute
+         svg('arrow-down', 16px, $color-main, none center)
+         right 18px
+      }
+   }
+
+   &.is-error {
+      .field__main {
+         &::after {
+            opacity 0
+         }
+      }
+   }
+}
+
+.field_toggle {
+   .field__main {
+      display flex
+      flex-wrap wrap
+      margin 0 -20px 18px
+   }
+   .field__item {
+      margin 0 20px
+      +do(500) {
+         flex-basis 100%
+      }
+   }
+}
