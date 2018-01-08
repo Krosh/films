@@ -102,14 +102,23 @@ module.exports = function (app, db) {
 
 
     app.get('/parse-film/', (req, res) => {
+
+        let url;
+
+        console.log('test');
+        setInterval(function () {
+
+        url = '';
+
         db.collection('films').findOne({
             isParsed: false
         }, (err, item) => {
             if (err) {
                 return;
             }
-            const url = item.url;
-            setInterval(function () {
+
+             url = item.url;
+
                 parser.parse(url, ($) => {
                     let info = {};
                     info.name = $('.moviename-big').text();
@@ -131,7 +140,7 @@ module.exports = function (app, db) {
                         }
                     });
                 })
-                console.log('eee бой')
+
             }, 30000)
         });
     });

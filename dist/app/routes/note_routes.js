@@ -105,14 +105,23 @@ module.exports = function (app, db) {
     });
 
     app.get('/parse-film/', function (req, res) {
-        db.collection('films').findOne({
-            isParsed: false
-        }, function (err, item) {
-            if (err) {
-                return;
-            }
-            var url = item.url;
-            setInterval(function () {
+
+        var url = undefined;
+
+        console.log('test');
+        setInterval(function () {
+
+            url = '';
+
+            db.collection('films').findOne({
+                isParsed: false
+            }, function (err, item) {
+                if (err) {
+                    return;
+                }
+
+                url = item.url;
+
                 parser.parse(url, function ($) {
                     var info = {};
                     info.name = $('.moviename-big').text();
@@ -134,7 +143,6 @@ module.exports = function (app, db) {
                         }
                     });
                 });
-                console.log('eee бой');
             }, 30000);
         });
     });
