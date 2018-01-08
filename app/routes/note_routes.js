@@ -104,7 +104,6 @@ module.exports = function (app, db) {
     app.get('/parse-film/', (req, res) => {
 
         let url;
-
         console.log('test');
         setInterval(function () {
 
