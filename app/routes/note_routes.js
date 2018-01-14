@@ -43,6 +43,82 @@ module.exports = function (app, db) {
 
     });
 
+    app.get('/votes/', (req, res) => {
+        db.collection("votesTasks").find().toArray(function (err, result) {
+            if (err) throw err;
+            res.send(result);
+            console.log(result);
+            db.close();
+        });
+    });
+
+    app.get('/parse-votes/', (req, res) => {
+        db.collection('votesTasks').findOne({
+            isParsed: false
+        }, (err, item) => {
+            let url = item.url;
+            db.collection('votesTasks').update({
+                url: url
+            }, {url: url, isParsed: true}, (err, item) => {
+                console.log(err);
+            });
+
+            if (err) {
+                return;
+            }
+
+            parser.parse(url, ($, res) => {
+                let hrefs = [];
+                if (!$('.profileFilmsList .item').length) {
+                    return;
+                }
+
+                $('.profileFilmsList .item').map(function () {
+                    const $a = $(this).find('a');
+                    hrefs.push($a.attr('href'));
+
+                    const mark = {
+                        idUser: item.idUser,
+                        rating: $(this).find('.vote').text(),
+                        film: $a.attr('href'),
+                    };
+                    console.log(mark);
+
+                    db.collection('users').find(mark)
+                        .toArray((err, data) => {
+                            console.log(err);
+                            if (err) {
+                                console.log('insert');
+                                db.collection('users').insert(mark);
+                            }
+                        });
+                });
+
+                db.collection('films').find({
+                    url: {$in: hrefs}
+                }).toArray((err, alreadySavedFilms) => {
+                    if (!err) {
+                        alreadySavedFilms.forEach((film) => {
+                            const pos = hrefs.indexOf(film.url);
+                            if (pos > -1) {
+                                hrefs.splice(pos, 1);
+                            }
+                        });
+                    }
+                    hrefs.forEach((url) => {
+                        let info = {url: url, isParsed: false};
+                        db.collection('films').insert(info);
+                    });
+                });
+
+                db.collection('votesTasks').update({
+                    url: url
+                }, {url: url, isParsed: true}, (err, item) => {
+                });
+            });
+        });
+    });
+
     app.get('/parse-user/:id', (req, res) => {
         const id = req.params.id;
         const url = `/user/${id}/votes/list/ord/date/page/1/#list`;
@@ -54,62 +130,25 @@ module.exports = function (app, db) {
 
             const totalNum = parseInt($('.pagesFromTo').text().split(' ').slice(-1)[0]);
             const numPage = 200;
-            console.log(totalNum);
             for (let i = 0; i <= totalNum / numPage; i++) {
                 const url = `/user/${id}/votes/list/ord/date/perpage/200/page/${i}/#list`;
-                setTimeout(() => {
-                    parser.parse(url, ($) => {
-                        let hrefs = [];
-                        $('.profileFilmsList .item').map(function () {
-                            const $a = $(this).find('a');
-                            hrefs.push($a.attr('href'));
 
-                            const mark = {
-                                idUser: id,
-                                rating: $(this).find('.vote').text(),
-                                film: $a.attr('href'),
-                            };
+                const votesTask = {
+                    isParsed: false,
+                    idUser: id,
+                    url: url,
+                };
 
-                            db.collection('films').find(mark)
-                                .toArray((err, data) => {
-                                    if (err) {
-                                        db.collection('films').insert(mark);
-                                    }
-                                });
-                        });
-
-                        db.collection('films').find({
-                            url: {$in: hrefs}
-                        }).toArray((err, alreadySavedFilms) => {
-                            if (!err) {
-                                alreadySavedFilms.forEach((film) => {
-                                    const pos = hrefs.indexOf(film.url);
-                                    if (pos > -1) {
-                                        hrefs.splice(pos, 1);
-                                    }
-                                });
-                            }
-                            hrefs.forEach((url) => {
-                                let info = {url: url, isParsed: false};
-                                db.collection('films').insert(info);
-                            });
-                        });
-                    });
-                }, i * 60000);
+                db.collection('votesTasks').insert(votesTask, (err, res) => {
+                    console.log(err);return;
+                });
             }
         })
     });
 
 
     app.get('/parse-film/', (req, res) => {
-
-        let url;
-
-        console.log('test');
         setInterval(function () {
-
-            url = '';
-
             db.collection('films').findOne({
                 isParsed: false
             }, (err, item) => {
@@ -117,7 +156,7 @@ module.exports = function (app, db) {
                     return;
                 }
 
-                url = item.url;
+                let url = item.url;
 
                 parser.parse(url, ($) => {
                     let info = {};
@@ -144,7 +183,6 @@ module.exports = function (app, db) {
             }, 30000)
         });
     });
-
 
     app.get('/users/:id', (req, res) => {
         const id = req.params.id;
