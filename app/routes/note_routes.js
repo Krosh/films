@@ -2,6 +2,7 @@ var ObjectID = require('mongodb').ObjectID;
 module.exports = function (app, db) {
     const parserModule = require('../parser/parser');
     const parser = new parserModule();
+    const REQUEST_DELAY = 60000;
 
 
     app.post('/add-film/', (req, res) => {
@@ -44,11 +45,6 @@ module.exports = function (app, db) {
     });
 
     app.get('/settings/', (req, res) => {
-/*
-        db.collection("settings").deleteMany({}, function (err, result) {
-
-        });
-*/
         db.collection("settings").find({}).toArray(function (err, result) {
             if (err) throw err;
             res.send(result);
@@ -157,13 +153,13 @@ module.exports = function (app, db) {
                 });
             });
         });
-    }, 30000)});
+    }, REQUEST_DELAY)});
 
     let parseUser = function(id, callback) {
         const url = `/user/${id}/votes/list/ord/date/page/1/#list`;
         parser.parse(url, ($, res) => {
             if (!$('.pagesFromTo').length) {
-                console.log('this is capthca');
+                console.log(res);
                 return;
             }
 
@@ -200,11 +196,16 @@ module.exports = function (app, db) {
     });
 
     app.get('/parse-film/', (req, res) => {
+        console.log('parse film start');
         setInterval(function () {
-            db.collection('films').findOne({
+            console.log('get from db');
+            const nonParsed = {
                 isParsed: false
-            }, (err, item) => {
+            };
+            db.collection('films').findOne(nonParsed, (err, item) => {
+                console.log('get', err, item);
                 if (err) {
+                    console.log('cannot find not parsed film');
                     return;
                 }
 
@@ -231,12 +232,11 @@ module.exports = function (app, db) {
                         }
                     });
                 })
-
-            }, 30000)
-        });
+            })
+        }, REQUEST_DELAY);
     });
 
-    app.get('/parse-next-user/', (req, res) => {
+    app.get('/parse-next-user/', (req, res) => {setInterval( () => {
         const SETTING_NAME = 'nextUser';
         const setting = {name: SETTING_NAME};
         db.collection('settings').findOne(setting, (err, item) => {
@@ -252,7 +252,7 @@ module.exports = function (app, db) {
                 });
             });
         });
-    });
+    }, REQUEST_DELAY)});
 
     app.get('/users/:id', (req, res) => {
         const id = req.params.id;
