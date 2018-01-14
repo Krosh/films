@@ -104,19 +104,20 @@ module.exports = function (app, db) {
     app.get('/parse-film/', (req, res) => {
 
         let url;
+
         console.log('test');
         setInterval(function () {
 
-        url = '';
+            url = '';
 
-        db.collection('films').findOne({
-            isParsed: false
-        }, (err, item) => {
-            if (err) {
-                return;
-            }
+            db.collection('films').findOne({
+                isParsed: false
+            }, (err, item) => {
+                if (err) {
+                    return;
+                }
 
-             url = item.url;
+                url = item.url;
 
                 parser.parse(url, ($) => {
                     let info = {};
@@ -143,6 +144,7 @@ module.exports = function (app, db) {
             }, 30000)
         });
     });
+
 
     app.get('/users/:id', (req, res) => {
         const id = req.params.id;
