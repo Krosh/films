@@ -38,9 +38,44 @@ module.exports = function (app, db) {
             if (err) throw err;
             res.send(result);
             console.log(result);
-            db.close();
+            // db.close();
         });
 
+    });
+
+    app.get('/settings/', (req, res) => {
+/*
+        db.collection("settings").deleteMany({}, function (err, result) {
+
+        });
+*/
+        db.collection("settings").find({}).toArray(function (err, result) {
+            if (err) throw err;
+            res.send(result);
+            console.log(result);
+            // db.cl`ose();
+        });
+
+    });
+
+    app.get('/clear/', (req, res) => {
+
+        db.collection("votesTasks").deleteMany({}, function (err, result) {
+
+        });
+        db.collection("users").deleteMany({}, function (err, result) {
+
+        });
+
+        db.collection("films").deleteMany({}, function (err, result) {
+
+        });
+
+        db.collection("settings").deleteMany({}, function (err, result) {
+            db.collection("settings").insert({name: 'nextUser', value: 1}, function (err, result) {
+                console.log('end');
+            });
+        });
     });
 
     app.get('/votes/', (req, res) => {
@@ -48,28 +83,32 @@ module.exports = function (app, db) {
             if (err) throw err;
             res.send(result);
             console.log(result);
-            db.close();
+            // db.close();
         });
     });
 
-    app.get('/parse-votes/', (req, res) => {
+    app.get('/parse-votes/', (req, res) => {setInterval(() => {
         db.collection('votesTasks').findOne({
             isParsed: false
         }, (err, item) => {
+            if (err) {
+                console.log('cannot find votesTask');
+                return;
+            }
+
             let url = item.url;
             db.collection('votesTasks').update({
                 url: url
             }, {url: url, isParsed: true}, (err, item) => {
-                console.log(err);
+                if (err) {
+                    console.log('update err');
+                }
             });
-
-            if (err) {
-                return;
-            }
 
             parser.parse(url, ($, res) => {
                 let hrefs = [];
                 if (!$('.profileFilmsList .item').length) {
+                    console.log('no profileFilmsList ');
                     return;
                 }
 
@@ -82,12 +121,13 @@ module.exports = function (app, db) {
                         rating: $(this).find('.vote').text(),
                         film: $a.attr('href'),
                     };
-                    console.log(mark);
+                    console.log('Mark', mark);
 
                     db.collection('users').find(mark)
                         .toArray((err, data) => {
-                            console.log(err);
                             if (err) {
+                                console.log('insert error');
+                            } else {
                                 console.log('insert');
                                 db.collection('users').insert(mark);
                             }
@@ -117,15 +157,18 @@ module.exports = function (app, db) {
                 });
             });
         });
-    });
+    }, 30000)});
 
-    app.get('/parse-user/:id', (req, res) => {
-        const id = req.params.id;
+    let parseUser = function(id, callback) {
         const url = `/user/${id}/votes/list/ord/date/page/1/#list`;
         parser.parse(url, ($, res) => {
             if (!$('.pagesFromTo').length) {
-                console.log(res);
+                console.log('this is capthca');
                 return;
+            }
+
+            if (typeof callback !== 'undefined') {
+                callback();
             }
 
             const totalNum = parseInt($('.pagesFromTo').text().split(' ').slice(-1)[0]);
@@ -139,13 +182,22 @@ module.exports = function (app, db) {
                     url: url,
                 };
 
-                db.collection('votesTasks').insert(votesTask, (err, res) => {
-                    console.log(err);return;
+                db.collection('votesTasks').findOne(votesTask, (err, res) => {
+                    console.log('find votesTask', err, res);
+                    if (res === null) {
+                        db.collection('votesTasks').insert(votesTask, (err, res) => {
+                            console.log('insert votesTask', err);
+                        });
+                    }
                 });
             }
         })
-    });
+    };
 
+    app.get('/parse-user/:id', (req, res) => {
+        const id = req.params.id;
+        parseUser(id);
+    });
 
     app.get('/parse-film/', (req, res) => {
         setInterval(function () {
@@ -184,6 +236,24 @@ module.exports = function (app, db) {
         });
     });
 
+    app.get('/parse-next-user/', (req, res) => {
+        const SETTING_NAME = 'nextUser';
+        const setting = {name: SETTING_NAME};
+        db.collection('settings').findOne(setting, (err, item) => {
+            let id = item.value + 1;
+
+            parseUser(id, () => {
+                db.collection('settings').update({
+                    name: SETTING_NAME
+                }, {name: SETTING_NAME, value: id}, (err, item) => {
+                    if (err) {
+                        console.log('update err setting');
+                    }
+                });
+            });
+        });
+    });
+
     app.get('/users/:id', (req, res) => {
         const id = req.params.id;
         const details = {'_id': new ObjectID(id)};
@@ -213,7 +283,7 @@ module.exports = function (app, db) {
             if (err) throw err;
             res.send(result);
             console.log(result);
-            db.close();
+            // db.close();
         });
 
     });
