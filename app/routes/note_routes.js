@@ -2,7 +2,7 @@ var ObjectID = require('mongodb').ObjectID;
 module.exports = function (app, db) {
     const parserModule = require('../parser/parser');
     const parser = new parserModule();
-    const REQUEST_DELAY = 60000;
+    const REQUEST_DELAY = 75000;
 
 
     app.post('/add-film/', (req, res) => {
@@ -92,73 +92,92 @@ module.exports = function (app, db) {
                 return;
             }
 
-            let url = item.url;
-            db.collection('votesTasks').update({
-                url: url
-            }, {url: url, isParsed: true}, (err, item) => {
-                if (err) {
-                    console.log('update err');
-                }
-            });
+            db.collection('votesTasks').findOne({
+                isParsed: true,
+                url: item.url
+            }, (err, res) => {
+                if (err || res == null) {
+                    console.log(item);
 
-            parser.parse(url, ($, res) => {
-                let hrefs = [];
-                if (!$('.profileFilmsList .item').length) {
-                    console.log('no profileFilmsList ');
-                    return;
-                }
-
-                $('.profileFilmsList .item').map(function () {
-                    const $a = $(this).find('a');
-                    hrefs.push($a.attr('href'));
-
-                    const mark = {
-                        idUser: item.idUser,
-                        rating: $(this).find('.vote').text(),
-                        film: $a.attr('href'),
-                    };
-                    console.log('Mark', mark);
-
-                    db.collection('users').find(mark)
-                        .toArray((err, data) => {
-                            if (err) {
-                                console.log('insert error');
-                            } else {
-                                console.log('insert');
-                                db.collection('users').insert(mark);
-                            }
-                        });
-                });
-
-                db.collection('films').find({
-                    url: {$in: hrefs}
-                }).toArray((err, alreadySavedFilms) => {
-                    if (!err) {
-                        alreadySavedFilms.forEach((film) => {
-                            const pos = hrefs.indexOf(film.url);
-                            if (pos > -1) {
-                                hrefs.splice(pos, 1);
-                            }
-                        });
-                    }
-                    hrefs.forEach((url) => {
-                        let info = {url: url, isParsed: false};
-                        db.collection('films').insert(info);
+                    let url = item.url;
+                    db.collection('votesTasks').update({
+                        url: url
+                    }, {url: url, isParsed: true}, (err, item) => {
+                        if (err) {
+                            console.log('update err');
+                        }
                     });
-                });
 
-                db.collection('votesTasks').update({
-                    url: url
-                }, {url: url, isParsed: true}, (err, item) => {
-                });
-            });
+                    parser.parse(url, ($, res) => {
+                        let hrefs = [];
+                        if (!$('.profileFilmsList .item').length) {
+                            console.log('no profileFilmsList ');
+                            return;
+                        }
+
+                        $('.profileFilmsList .item').map(function () {
+                            const $a = $(this).find('a');
+                            hrefs.push($a.attr('href'));
+
+                            const mark = {
+                                idUser: item.idUser,
+                                rating: $(this).find('.vote').text(),
+                                film: $a.attr('href'),
+                            };
+                            console.log('Mark', mark);
+
+                            db.collection('users').find(mark)
+                                .toArray((err, data) => {
+                                    if (err) {
+                                        console.log('insert error');
+                                    } else {
+                                        console.log('insert');
+                                        db.collection('users').insert(mark);
+                                    }
+                                });
+                        });
+
+                        db.collection('films').find({
+                            url: {$in: hrefs}
+                        }).toArray((err, alreadySavedFilms) => {
+                            if (!err) {
+                                alreadySavedFilms.forEach((film) => {
+                                    const pos = hrefs.indexOf(film.url);
+                                    if (pos > -1) {
+                                        hrefs.splice(pos, 1);
+                                    }
+                                });
+                            }
+                            hrefs.forEach((url) => {
+                                let info = {url: url, isParsed: false};
+                                db.collection('films').insert(info);
+                            });
+                        });
+
+                        db.collection('votesTasks').update({
+                            url: url
+                        }, {url: url, isParsed: true}, (err, item) => {
+                        });
+                    });
+                } else {
+                    console.log('copy, delete this');
+                    db.collection('votesTasks').deleteOne({
+                        _id: item._id,
+                    }, (err, res) => {
+
+                    });
+                }
+            })
         });
     }, REQUEST_DELAY)});
 
     let parseUser = function(id, callback) {
         const url = `/user/${id}/votes/list/ord/date/page/1/#list`;
         parser.parse(url, ($, res) => {
-            if (!$('.pagesFromTo').length) {
+
+            var hasModeratorPage = $('li.off.menuButton3 span').text() == 'Оценки';
+            var error404 = $('h1').text() == '404 — Страница не найдена';
+            if (!$('.pagesFromTo').length && !error404 && !hasModeratorPage) {
                 console.log(res);
                 return;
             }
@@ -167,6 +186,9 @@ module.exports = function (app, db) {
                 callback();
             }
 
+            if (error404) {
+                return;
+            }
             const totalNum = parseInt($('.pagesFromTo').text().split(' ').slice(-1)[0]);
             const numPage = 200;
             for (let i = 0; i <= totalNum / numPage; i++) {
@@ -236,7 +258,9 @@ module.exports = function (app, db) {
         }, REQUEST_DELAY);
     });
 
-    app.get('/parse-next-user/', (req, res) => {setInterval( () => {
+    app.get('/parse-next-user/', (req, res) => {
+        console.log('parse next uset');
+        setInterval( () => {
         const SETTING_NAME = 'nextUser';
         const setting = {name: SETTING_NAME};
         db.collection('settings').findOne(setting, (err, item) => {

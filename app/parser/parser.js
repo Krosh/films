@@ -1,6 +1,6 @@
 module.exports = function () {
     this.parse = async function (siteUrl, callback) {
-        console.log('start');
+        console.log('start ', siteUrl);
         const domain = 'https://www.kinopoisk.ru';
         const phantom = require('phantom');
         const instance = await phantom.create([], {
