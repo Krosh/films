@@ -2,7 +2,7 @@ var ObjectID = require('mongodb').ObjectID;
 module.exports = function (app, db) {
     const parserModule = require('../parser/parser');
     const parser = new parserModule();
-    const REQUEST_DELAY = 60000;
+    const REQUEST_DELAY = 75000;
 
 
     app.post('/add-film/', (req, res) => {
@@ -158,7 +158,10 @@ module.exports = function (app, db) {
     let parseUser = function(id, callback) {
         const url = `/user/${id}/votes/list/ord/date/page/1/#list`;
         parser.parse(url, ($, res) => {
-            if (!$('.pagesFromTo').length) {
+
+            var hasModeratorPage = $('li.off.menuButton3 span').text() == 'Оценки';
+            var error404 = $('h1').text() == '404 — Страница не найдена';
+            if (!$('.pagesFromTo').length && !error404 && !hasModeratorPage) {
                 console.log(res);
                 return;
             }
@@ -167,6 +170,9 @@ module.exports = function (app, db) {
                 callback();
             }
 
+            if (error404) {
+                return;
+            }
             const totalNum = parseInt($('.pagesFromTo').text().split(' ').slice(-1)[0]);
             const numPage = 200;
             for (let i = 0; i <= totalNum / numPage; i++) {
@@ -236,7 +242,9 @@ module.exports = function (app, db) {
         }, REQUEST_DELAY);
     });
 
-    app.get('/parse-next-user/', (req, res) => {setInterval( () => {
+    app.get('/parse-next-user/', (req, res) => {
+        console.log('parse next uset');
+        setInterval( () => {
         const SETTING_NAME = 'nextUser';
         const setting = {name: SETTING_NAME};
         db.collection('settings').findOne(setting, (err, item) => {
