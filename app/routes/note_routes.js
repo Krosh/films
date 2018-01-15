@@ -92,66 +92,82 @@ module.exports = function (app, db) {
                 return;
             }
 
-            let url = item.url;
-            db.collection('votesTasks').update({
-                url: url
-            }, {url: url, isParsed: true}, (err, item) => {
-                if (err) {
-                    console.log('update err');
-                }
-            });
+            db.collection('votesTasks').findOne({
+                isParsed: true,
+                url: item.url
+            }, (err, res) => {
+                if (err || res == null) {
+                    console.log(item);
 
-            parser.parse(url, ($, res) => {
-                let hrefs = [];
-                if (!$('.profileFilmsList .item').length) {
-                    console.log('no profileFilmsList ');
-                    return;
-                }
-
-                $('.profileFilmsList .item').map(function () {
-                    const $a = $(this).find('a');
-                    hrefs.push($a.attr('href'));
-
-                    const mark = {
-                        idUser: item.idUser,
-                        rating: $(this).find('.vote').text(),
-                        film: $a.attr('href'),
-                    };
-                    console.log('Mark', mark);
-
-                    db.collection('users').find(mark)
-                        .toArray((err, data) => {
-                            if (err) {
-                                console.log('insert error');
-                            } else {
-                                console.log('insert');
-                                db.collection('users').insert(mark);
-                            }
-                        });
-                });
-
-                db.collection('films').find({
-                    url: {$in: hrefs}
-                }).toArray((err, alreadySavedFilms) => {
-                    if (!err) {
-                        alreadySavedFilms.forEach((film) => {
-                            const pos = hrefs.indexOf(film.url);
-                            if (pos > -1) {
-                                hrefs.splice(pos, 1);
-                            }
-                        });
-                    }
-                    hrefs.forEach((url) => {
-                        let info = {url: url, isParsed: false};
-                        db.collection('films').insert(info);
+                    let url = item.url;
+                    db.collection('votesTasks').update({
+                        url: url
+                    }, {url: url, isParsed: true}, (err, item) => {
+                        if (err) {
+                            console.log('update err');
+                        }
                     });
-                });
 
-                db.collection('votesTasks').update({
-                    url: url
-                }, {url: url, isParsed: true}, (err, item) => {
-                });
-            });
+                    parser.parse(url, ($, res) => {
+                        let hrefs = [];
+                        if (!$('.profileFilmsList .item').length) {
+                            console.log('no profileFilmsList ');
+                            return;
+                        }
+
+                        $('.profileFilmsList .item').map(function () {
+                            const $a = $(this).find('a');
+                            hrefs.push($a.attr('href'));
+
+                            const mark = {
+                                idUser: item.idUser,
+                                rating: $(this).find('.vote').text(),
+                                film: $a.attr('href'),
+                            };
+                            console.log('Mark', mark);
+
+                            db.collection('users').find(mark)
+                                .toArray((err, data) => {
+                                    if (err) {
+                                        console.log('insert error');
+                                    } else {
+                                        console.log('insert');
+                                        db.collection('users').insert(mark);
+                                    }
+                                });
+                        });
+
+                        db.collection('films').find({
+                            url: {$in: hrefs}
+                        }).toArray((err, alreadySavedFilms) => {
+                            if (!err) {
+                                alreadySavedFilms.forEach((film) => {
+                                    const pos = hrefs.indexOf(film.url);
+                                    if (pos > -1) {
+                                        hrefs.splice(pos, 1);
+                                    }
+                                });
+                            }
+                            hrefs.forEach((url) => {
+                                let info = {url: url, isParsed: false};
+                                db.collection('films').insert(info);
+                            });
+                        });
+
+                        db.collection('votesTasks').update({
+                            url: url
+                        }, {url: url, isParsed: true}, (err, item) => {
+                        });
+                    });
+                } else {
+                    console.log('copy, delete this');
+                    db.collection('votesTasks').deleteOne({
+                        _id: item._id,
+                    }, (err, res) => {
+
+                    });
+                }
+            })
         });
     }, REQUEST_DELAY)});
 
