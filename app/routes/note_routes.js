@@ -4,6 +4,11 @@ module.exports = function (app, db) {
     const parser = new parserModule();
     const REQUEST_DELAY = 75000;
 
+    app.use(function(req, res, next) {
+        res.header("Access-Control-Allow-Origin", "*");
+        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+        next();
+    });
 
     app.post('/add-film/', (req, res) => {
         const movie = {
@@ -37,12 +42,28 @@ module.exports = function (app, db) {
     app.get('/films/', (req, res) => {
         db.collection("films").find({isParsed: true}).toArray(function (err, result) {
             if (err) throw err;
-            res.send(result);
+            res.json(result);
             console.log(result);
             // db.close();
         });
-
     });
+
+
+    app.get('/film/', (req, res) => {
+        db
+            .collection('films')
+            .aggregate([
+                { $match: { isParsed: true} },
+                { $sample: { size: 1 } },
+            ])
+            .toArray(function (err, result) {
+                if (err) throw err;
+                res.send(result.pop());
+                console.log(result);
+                // db.close();
+            });
+    });
+
 
     app.get('/settings/', (req, res) => {
         db.collection("settings").find({}).toArray(function (err, result) {
@@ -83,7 +104,7 @@ module.exports = function (app, db) {
         });
     });
 
-    app.get('/parse-votes/', (req, res) => {setInterval(() => {
+    app.get('/parse-votes/', (req, res) => {console.log('prse-votes');setInterval(() => {
         db.collection('votesTasks').findOne({
             isParsed: false
         }, (err, item) => {
