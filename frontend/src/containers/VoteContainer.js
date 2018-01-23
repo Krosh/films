@@ -3,7 +3,6 @@ import {loadFilm} from "../actions/VoteActions";
 import Vote from "../components/Vote";
 
 const mapStateToProps = (state, ownProps) => {
-    console.log(state, ownProps);
     return {currentFilm: 'sdsdds'};
 }
 

@@ -16,19 +16,18 @@ export function loadFilmSuccess(value) {
 }
 
  export function loadFilm() {
-    return function() {
-        console.log('dsds');
-        return {};
-    };
     return function(dispatch) {
-        dispatch(loadFilmSuccess({}));
+        console.log(dispatch)
+        const url = 'http://localhost:8000/film/';
 
-        // return FilmApi
-        // .loadFilm()
-        // .then(film => {
-        //     dispatch(loadFilmSuccess(film));
-        // }).catch(error => {
-        //     throw(error);
-        // });
+        fetch(url, {
+            mode: 'cors',
+        })
+        .then(res => res.json())
+        .then(films => {
+            dispatch(loadFilmSuccess(films));
+        }).catch(error => {
+            throw(error);
+        });
     };
 }

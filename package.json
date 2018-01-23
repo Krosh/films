@@ -14,7 +14,8 @@
     "cheerio": "^1.0.0-rc.2",
     "express": "^4.16.2",
     "mongodb": "^2.2.33",
-    "phantom": "^4.0.12"
+    "phantom": "^4.0.12",
+    "redux-logger": "^3.0.6"
   },
   "devDependencies": {
     "nodemon": "^1.14.7"

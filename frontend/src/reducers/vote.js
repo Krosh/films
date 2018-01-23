@@ -9,7 +9,7 @@ const initialState = {
     mark: 3,
 };
 
-export default function vote(state = initialState, action) {
+export default function(state = initialState, action) {
     switch (action.type) {
         case types.SET_MARK:
             return {
@@ -21,7 +21,6 @@ export default function vote(state = initialState, action) {
                 ...state,
                 currentFilm: action.value,
             };
-
         default:
             return state;
     }
