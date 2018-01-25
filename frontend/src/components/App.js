@@ -1,15 +1,27 @@
 import React, {Component} from 'react';
 
-import VoteContainer from "../containers/VoteContainer";
+import {connect} from "react-redux";
+import Vote from "./Vote";
+import {loadFilm} from "../actions/VoteActions";
 
 
 class App extends Component {
-
     render() {
+        console.log(this.props);
         return (
-            <VoteContainer/>
+            <Vote currentFilm={this.props.currentFilm} nextBtnClick={() => {this.props.dispatch(loadFilm())}}/>
         );
     }
 }
 
-export default App;
+const mapStateToProps = state => {
+    console.log(state);
+    return {
+        ...state.vote
+    }
+}
+
+export default connect(
+    mapStateToProps,
+    // mapDispatchToProps
+)(App);

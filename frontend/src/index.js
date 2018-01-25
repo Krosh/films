@@ -7,11 +7,12 @@ import { createStore, applyMiddleware, combineReducers } from 'redux';
 import thunk from 'redux-thunk';
 import { Provider } from 'react-redux'
 
-import * as reducers from './reducers';
+import vote from './reducers/vote';
 import {loadFilm} from "./actions/VoteActions";
 
-const reducer = combineReducers(reducers);
-const store = createStore(reducer, applyMiddleware(thunk));
+const reducer = combineReducers({vote});
+const createStoreWithMiddleware = applyMiddleware(thunk)(createStore);
+const store = createStoreWithMiddleware(reducer, { users: null });
 
 store.dispatch(loadFilm());
 ReactDOM.render(<Provider store={store}>
