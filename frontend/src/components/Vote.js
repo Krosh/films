@@ -1,7 +1,8 @@
 import React, {Component} from 'react';
 import Rating from 'react-rating';
+import NumVotes from "./NumVotes";
 
-const Vote = ({nextBtnClick, currentFilm, mark, changeMark}) => {
+const Vote = ({nextBtnClick, currentFilm, mark, changeMark, totalInfo}) => {
     const btnClass = 'button' + (mark ? '' : ' disabled');
     return (
         <div className="section section_intro block">
@@ -23,9 +24,7 @@ const Vote = ({nextBtnClick, currentFilm, mark, changeMark}) => {
                                                     {currentFilm.name}
                                                 </div>
                                             </div>
-                                            <div className="filmsIntro__header-side">
-                                                <div className="filmsIntro__count">1/5</div>
-                                            </div>
+                                            <NumVotes current={totalInfo.current} total={totalInfo.total}/>
                                         </div>
                                     </div>
                                     <div className="filmsIntro__desc">

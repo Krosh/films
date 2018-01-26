@@ -8,7 +8,7 @@ import {loadFilm, setMark} from "../actions/VoteActions";
 class App extends Component {
     render() {
         return (
-            <Vote changeMark={(value) => {this.props.dispatch(setMark(value))}} mark={this.props.mark} currentFilm={this.props.currentFilm} nextBtnClick={() => {this.props.dispatch(loadFilm())}}/>
+            <Vote changeMark={(value) => {this.props.dispatch(setMark(value))}} mark={this.props.mark} currentFilm={this.props.currentFilm} nextBtnClick={() => {this.props.dispatch(loadFilm())}} totalInfo={this.props.totalInfo}/>
         );
     }
 }

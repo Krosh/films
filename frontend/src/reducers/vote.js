@@ -7,6 +7,10 @@ const initialState = {
         poster: 'images/temp/poster.jpg',
     },
     mark: 3,
+    totalInfo: {
+        current: 0,
+        total: 5,
+    }
 };
 
 export default function vote(state = initialState, action) {
@@ -21,6 +25,10 @@ export default function vote(state = initialState, action) {
                 ...state,
                 mark: 0,
                 currentFilm: action.value,
+                totalInfo: {
+                    current: state.totalInfo.current + 1,
+                    total: state.totalInfo.total,
+                }
             };
 
         default:
