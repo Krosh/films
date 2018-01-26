@@ -414,6 +414,10 @@ ul li::before {
   text-transform: none;
   text-decoration: none;
 }
+.button.disabled {
+  background: gray;
+  pointer-events: none;
+}
 .button__ok {
   margin-left: 6px;
 }
@@ -441,7 +445,7 @@ ul li::before {
   margin-left: 10px;
   margin-right: 0;
 }
-.button:hover {
+.button:not(.disabled):hover {
   background-color: #41925d;
   -webkit-box-shadow: none;
   box-shadow: none;

@@ -1,7 +1,8 @@
 import React, {Component} from 'react';
 import Rating from 'react-rating';
 
-let Vote = ({nextBtnClick, currentFilm}) => {
+const Vote = ({nextBtnClick, currentFilm, mark, changeMark}) => {
+    const btnClass = 'button' + (mark ? '' : ' disabled');
     return (
         <div className="section section_intro block">
             <div className="block-wrapper">
@@ -10,7 +11,7 @@ let Vote = ({nextBtnClick, currentFilm}) => {
                         <div className="filmsIntro__wrapper">
                             <div className="filmsIntro__side">
                                 <div className="filmsIntro__poster"
-                                     style={{backgroundImage: "url('" + currentFilm.poster + "')"}}>
+                                     style={{backgroundImage: "url('" + currentFilm.image + "')"}}>
                                 </div>
                             </div>
                             <div className="filmsIntro__main">
@@ -32,13 +33,15 @@ let Vote = ({nextBtnClick, currentFilm}) => {
                                     </div>
                                     <div className="filmsIntro__rating">
                                         <Rating
+                                            onChange={changeMark}
+                                            initialRating={mark}
                                             emptySymbol={<div className="rating__item"/>}
                                             fullSymbol={<div className="rating__item rating__item_active"/>}
                                         />
                                     </div>
                                     <div className="filmsIntro__action">
                                         <div className="filmsIntro__action-item">
-                                            <button className="button" onClick={ () => nextBtnClick()}>
+                                            <button className={btnClass} onClick={ () => nextBtnClick()}>
                                                 <span className="button__title">Следуюший</span>
                                                 <span className="button__ok"></span>
                                             </button>

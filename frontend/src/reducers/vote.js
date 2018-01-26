@@ -19,6 +19,7 @@ export default function vote(state = initialState, action) {
         case types.LOAD_FILM:
             return {
                 ...state,
+                mark: 0,
                 currentFilm: action.value,
             };
 
