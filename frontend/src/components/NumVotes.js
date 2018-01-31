@@ -1,5 +1,4 @@
-import React, {Component} from 'react';
-import Rating from 'react-rating';
+import React from 'react';
 
 const NumVotes = ({current, total}) => {
     return (

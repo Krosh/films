@@ -16,13 +16,25 @@ export function loadFilmSuccess(value) {
 }
 
  export function loadFilm() {
-    return function(dispatch) {
+    return function(dispatch, getState) {
         return FilmApi
-        .loadFilm()
-        .then(film => {
-            dispatch(loadFilmSuccess(film));
-        }).catch(error => {
-            throw(error);
-        });
+            .loadFilm(getState().vote)
+            .then(film => {
+                dispatch(loadFilmSuccess(film));
+            }).catch(error => {
+                throw(error);
+            });
     };
+}
+
+export function markAsSkipped() {
+    return {
+        type:types.MARK_AS_SKIPPED,
+    }
+}
+
+export function markAsAnswered() {
+    return {
+        type:types.MARK_AS_ANSWERED,
+    }
 }

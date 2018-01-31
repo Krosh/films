@@ -49,7 +49,7 @@ module.exports = function (app, db) {
     });
 
 
-    app.get('/film/', (req, res) => {
+    app.post('/film/', (req, res) => {
         db
             .collection('films')
             .aggregate([

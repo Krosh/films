@@ -2,13 +2,16 @@ import React, {Component} from 'react';
 
 import {connect} from "react-redux";
 import Vote from "./Vote";
-import {loadFilm, setMark} from "../actions/VoteActions";
+import {loadFilm, setMark,  markAsAnswered, markAsSkipped} from "../actions/VoteActions";
 
 
 class App extends Component {
     render() {
+        const nextBtnClick = () => {this.props.dispatch(markAsAnswered()); this.props.dispatch(loadFilm())};
+        const changeMark = (value) => {this.props.dispatch(setMark(value))};
+        const skipBtnClick = () => {this.props.dispatch(markAsSkipped()); this.props.dispatch(loadFilm())};
         return (
-            <Vote changeMark={(value) => {this.props.dispatch(setMark(value))}} mark={this.props.mark} currentFilm={this.props.currentFilm} nextBtnClick={() => {this.props.dispatch(loadFilm())}} totalInfo={this.props.totalInfo}/>
+            <Vote changeMark={changeMark} mark={this.props.mark} currentFilm={this.props.currentFilm} skipBtnClick={skipBtnClick} nextBtnClick={nextBtnClick} totalInfo={this.props.totalInfo}/>
         );
     }
 }

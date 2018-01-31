@@ -1,8 +1,8 @@
-import React, {Component} from 'react';
+import React from 'react';
 import Rating from 'react-rating';
 import NumVotes from "./NumVotes";
 
-const Vote = ({nextBtnClick, currentFilm, mark, changeMark, totalInfo}) => {
+const Vote = ({skipBtnClick, nextBtnClick, currentFilm, mark, changeMark, totalInfo}) => {
     const btnClass = 'button' + (mark ? '' : ' disabled');
     return (
         <div className="section section_intro block">
@@ -42,7 +42,11 @@ const Vote = ({nextBtnClick, currentFilm, mark, changeMark, totalInfo}) => {
                                         <div className="filmsIntro__action-item">
                                             <button className={btnClass} onClick={ () => nextBtnClick()}>
                                                 <span className="button__title">Следуюший</span>
-                                                <span className="button__ok"></span>
+                                                <span className="button__ok"/>
+                                            </button>
+
+                                            <button className="button" onClick={ () => skipBtnClick()}>
+                                                <span className="button__title">Пропустить</span>
                                             </button>
                                         </div>
                                     </div>

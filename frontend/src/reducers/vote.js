@@ -2,6 +2,7 @@ import * as types from '../constants/ActionTypes';
 
 const initialState = {
     currentFilm: {
+        _id: 0,
         name: 'Фильм',
         desc: 'Описание',
         poster: 'images/temp/poster.jpg',
@@ -10,6 +11,8 @@ const initialState = {
     totalInfo: {
         current: 0,
         total: 5,
+        answered: [],
+        skipped: [],
     }
 };
 
@@ -20,15 +23,34 @@ export default function vote(state = initialState, action) {
                 ...state,
                 mark: action.value,
             };
+        case types.MARK_AS_SKIPPED:
+            return {
+                ...state,
+                totalInfo: {
+                    ...state.totalInfo,
+                    skipped: state.totalInfo.skipped.concat([{
+                        id: state.currentFilm._id,
+                    }]),
+                }
+            };
+        case types.MARK_AS_ANSWERED:
+            return {
+                ...state,
+                totalInfo: {
+                    ...state.totalInfo,
+                    current: state.totalInfo.current + 1,
+                    answered: state.totalInfo.answered.concat([{
+                        id: state.currentFilm._id,
+                        mark: state.mark,
+                    }]),
+                }
+            };
+
         case types.LOAD_FILM:
             return {
                 ...state,
                 mark: 0,
                 currentFilm: action.value,
-                totalInfo: {
-                    current: state.totalInfo.current + 1,
-                    total: state.totalInfo.total,
-                }
             };
 
         default:
