@@ -9,8 +9,9 @@ import { Provider } from 'react-redux'
 
 import vote from './reducers/vote';
 import {loadFilm} from "./actions/VoteActions";
+import totalInfo from "./reducers/totalInfo";
 
-const reducer = combineReducers({vote});
+const reducer = combineReducers({vote, totalInfo});
 const createStoreWithMiddleware = applyMiddleware(thunk)(createStore);
 const store = createStoreWithMiddleware(reducer, { users: null });
 

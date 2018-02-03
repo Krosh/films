@@ -26,15 +26,3 @@ export function loadFilmSuccess(value) {
             });
     };
 }
-
-export function markAsSkipped() {
-    return {
-        type:types.MARK_AS_SKIPPED,
-    }
-}
-
-export function markAsAnswered() {
-    return {
-        type:types.MARK_AS_ANSWERED,
-    }
-}
