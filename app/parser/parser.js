@@ -34,7 +34,7 @@ module.exports = function () {
         // });
     }
 
-    let parseUser = function(id, callback, app, db) {
+    let parseUser = function (id, callback, app, db) {
         const url = `/user/${id}/votes/list/ord/date/page/1/#list`;
         parse(url, ($, res) => {
 
@@ -78,14 +78,15 @@ module.exports = function () {
     this.parseUser = (app, db) => {
         return (req, res) => {
             const id = req.params.id;
-            parseUser(id, () => {}, app, db);
+            parseUser(id, () => {
+            }, app, db);
         }
     }
 
     this.parseNextUser = (app, db) => {
-       return (req, res) => {
+        return (req, res) => {
             console.log('parse next uset');
-            setInterval( () => {
+            setInterval(() => {
                 const SETTING_NAME = 'nextUser';
                 const setting = {name: SETTING_NAME};
                 db.collection('settings').findOne(setting, (err, item) => {
@@ -101,7 +102,8 @@ module.exports = function () {
                         });
                     }, app, db);
                 });
-            }, REQUEST_DELAY)}
+            }, REQUEST_DELAY)
+        }
     }
 
     this.parseVotes = (app, db) => {
@@ -202,40 +204,43 @@ module.exports = function () {
             console.log('parse film start');
             setInterval(function () {
                 console.log('get from db');
-                const nonParsed = {
-                    isParsed: false
-                };
-                db.collection('films').findOne(nonParsed, (err, item) => {
-                    console.log('get', err, item);
-                    if (err) {
-                        console.log('cannot find not parsed film');
-                        return;
-                    }
-
-                    let url = item.url;
-
-                    ююparse(url, ($) => {
-                        let info = {};
-                        info.name = $('.moviename-big').text();
-                        if (info.name == '') {
-                            console.log('has captcha')
+                db.collection('films')
+                    .aggregate([
+                        {$match: {isParsed: false}},
+                        {$sample: {size: 1}},
+                    ])
+                    .toArray(function (err, result) {
+                        if (err) {
+                            console.log('cannot find not parsed film');
                             return;
                         }
-                        info.engName = $('span[itemprop="alternativeHeadline"]').text();
-                        info.image = $('.film-img-box [itemprop="image"]').attr('src');
-                        info.url = url;
-                        info.isParsed = true;
-                        info.rating = parseFloat($('.rating_ball').text());
+                        const item = result.pop();
+                        console.log('get', err, item);
 
-                        db.collection('films').update({url: url}, info, (err, result) => {
-                            if (err) {
-                                res.send({'error': 'An error has occurred'});
-                            } else {
-                                res.send(result.ops);
+                        let url = item.url;
+
+                        parse(url, ($) => {
+                            let info = {};
+                            info.name = $('.moviename-big').text();
+                            if (info.name == '') {
+                                console.log('has captcha')
+                                return;
                             }
-                        });
+                            info.engName = $('span[itemprop="alternativeHeadline"]').text();
+                            info.image = $('.film-img-box [itemprop="image"]').attr('src');
+                            info.url = url;
+                            info.isParsed = true;
+                            info.rating = parseFloat($('.rating_ball').text());
+
+                            db.collection('films').update({url: url}, info, (err, result) => {
+                                if (err) {
+                                    res.send({'error': 'An error has occurred'});
+                                } else {
+                                    res.send(result.ops);
+                                }
+                            });
+                        })
                     })
-                })
             }, REQUEST_DELAY);
         }
     }
